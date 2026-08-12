@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Azaadi Ka Tadka — Independence Day Trivia</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+  <script src="js/config_v3.js?v=3"></script>
+  <script src="js/api_v3.js?v=3"></script>
+  <script src="js/camera_v3.js?v=3"></script>
+  <script src="js/camera-monitor_v3.js?v=3"></script>
+  <style>
+    :root{--navy:#07101f;--card:#101a2c;--card2:#0b1423;--saffron:#ff9633;--green:#21a35a;--white:#f5f7fb;--muted:#aeb8c8;--red:#ff6565;--line:rgba(255,255,255,.12)}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 50% 0,#18263d 0,#07101f 55%,#040a13 100%);color:var(--white);font-family:Inter,Arial,sans-serif;min-height:100vh}
+    .wrap{width:min(900px,calc(100% - 28px));margin:0 auto;padding:24px 0 50px}.flag{height:7px;border-radius:8px;background:linear-gradient(#ff9933 0 33%,#fff 33% 66%,#138808 66%);margin-bottom:26px}
+    .brand{text-align:center}.brand h1{font-family:Georgia,serif;font-style:italic;color:var(--saffron);font-size:44px;margin:10px 0 6px}.brand p{color:var(--muted);margin:0 0 25px;font-size:17px}
+    .card{background:rgba(16,26,44,.94);border:1px solid rgba(255,153,51,.35);border-radius:22px;padding:30px;box-shadow:0 25px 70px rgba(0,0,0,.32)}
+    .hidden{display:none!important}.rules{background:var(--card2);border:1px solid rgba(255,153,51,.28);border-radius:14px;padding:20px;line-height:1.7;color:#d5dbe5;margin-bottom:20px}.rules b{color:var(--saffron)}
+    label{display:block;font-weight:700;margin-bottom:8px}.name{width:100%;padding:15px 16px;border-radius:12px;border:1px solid #cfd8e7;background:#edf3ff;color:#111;font-size:17px;margin-bottom:14px}
+    button{font:inherit;cursor:pointer}.primary{width:100%;padding:16px;border:0;border-radius:12px;background:var(--saffron);color:#111;font-weight:800;font-size:18px}.primary:disabled{opacity:.55;cursor:not-allowed}
+    .camera-box{margin-top:18px;border:1px solid var(--line);border-radius:15px;padding:16px;background:rgba(0,0,0,.15)}.camera-head{display:flex;gap:12px;align-items:center}.camera-head strong{display:block}.camera-head small{color:var(--muted)}
+    video{width:100%;max-height:430px;object-fit:cover;border-radius:13px;margin-top:14px;background:#02060d;display:none;transform:scaleX(-1)}
+    .signals{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.signal{font-size:12px;padding:6px 9px;border-radius:999px;background:rgba(33,163,90,.12);color:#80e3a7}.signal[data-state="warning"]{background:rgba(255,101,101,.12);color:#ff8b8b}
+    .status{min-height:24px;margin:13px 0;color:#ff9c9c;font-weight:700}.hint{color:var(--muted);font-size:12px;text-align:center;margin-top:10px}
+    .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:var(--muted)}.progress{height:8px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin-bottom:25px}.progress>div{height:100%;background:linear-gradient(90deg,var(--saffron),var(--green));width:0;transition:width .25s}
+    .tag{display:inline-block;color:var(--saffron);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}.question{font-family:Georgia,serif;font-size:26px;line-height:1.4;margin:0 0 22px}.options{display:grid;gap:12px}.option{text-align:left;width:100%;padding:16px;border:1px solid var(--line);border-radius:13px;background:#0b1423;color:#fff}.option:hover{border-color:var(--saffron)}.option.selected{border-color:var(--saffron);background:rgba(255,150,51,.14)}.option:disabled{cursor:default}
+    .done{text-align:center}.score{font-size:54px;font-weight:900;color:var(--saffron);margin:10px}.leader{margin-top:25px;text-align:left}.leader h3{text-align:center;color:var(--saffron)}.row{display:grid;grid-template-columns:48px 1fr 90px 90px;gap:8px;padding:12px;border-bottom:1px solid var(--line)}.row:first-child{font-weight:800;color:var(--muted)}
+    .notice{position:fixed;top:0;left:0;right:0;background:var(--saffron);color:#111;padding:10px;text-align:center;font-weight:800;transform:translateY(-100%);transition:.2s;z-index:20}.notice.show{transform:translateY(0)}
+    .error{background:rgba(255,101,101,.1);border:1px solid rgba(255,101,101,.5);padding:14px;border-radius:12px;color:#ff9a9a;margin-top:15px}.privacy{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+    @media(max-width:600px){.card{padding:20px}.brand h1{font-size:34px}.question{font-size:22px}.row{grid-template-columns:35px 1fr 65px}.row .time{display:none}}
+  </style>
+</head>
+<body>
+<div class="notice" id="notice"></div>
+<div class="wrap">
+  <div class="flag"></div>
+  <div class="brand"><h1>Azaadi Ka Tadka</h1><p>Independence Day Trivia — 20 questions. No timer. One shot.</p></div>
+
+  <div class="card" id="startScreen">
+    <div class="rules">
+      <b>Before you begin:</b><br>
+      • Enter your name and select <b>Begin Trivia</b>.<br>
+      • Your browser will ask for camera access. The button itself does not say “camera permission”.<br>
+      • Camera-based integrity checks run locally in your browser while you play.<br>
+      • We do <b>not</b> upload or record the camera video.<br>
+      • The quiz has <b>20 questions</b> and no countdown timer.<br>
+      • Stay on the quiz page and keep the camera active.<br>
+      • Your answers are checked and your score is calculated server-side.<br>
+      • Your score and the event leaderboard are shown when you finish.
+    </div>
+    <label for="nameInput">Your name</label>
+    <input class="name" id="nameInput" maxlength="60" autocomplete="name" placeholder="Enter your name">
+
+    <div class="camera-box">
+      <div class="camera-head"><span style="font-size:25px">📷</span><div><strong id="cameraTitle">Camera check</strong><small id="cameraStatus">Camera will start when you select Begin Trivia.</small></div></div>
+      <video id="cameraPreview" autoplay muted playsinline></video>
+      <div class="signals hidden" id="cameraSignals"><span class="signal" id="faceSignal">● Face check starting</span><span class="signal" id="deviceSignal">● Visible-device check starting</span></div>
+    </div>
+
+    <div class="status" id="startStatus"></div>
+    <button class="primary" id="beginBtn">🇮🇳 Begin Trivia</button>
+    <div class="hint">Selecting Begin Trivia starts the camera check and then starts your trivia session.</div>
+    <div class="privacy">Camera frames are processed locally by the browser for integrity signals. Only event metadata such as “face not detected” or “possible phone visible” is sent to the trivia backend.</div>
+  </div>
+
+  <div class="card hidden" id="quizScreen">
+    <div class="quiz-top"><strong id="counter">Question 1 of 20</strong><span id="monitorState">● Monitoring active</span></div>
+    <div class="progress"><div id="progressFill"></div></div>
+    <div class="tag" id="tag"></div>
+    <h2 class="question" id="question"></h2>
+    <div class="options" id="options"></div>
+    <div class="status" id="quizStatus"></div>
+  </div>
+
+  <div class="card hidden done" id="doneScreen">
+    <div style="font-size:52px">🏆</div><h2>That's a wrap!</h2>
+    <p id="doneName"></p><div class="score" id="score">0 / 20</div><p id="integritySummary"></p>
+    <div class="leader"><h3>Leaderboard</h3><div id="leaderRows"></div></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  const cfg = window.TRIVIA_CONFIG_V3;
+  const API = window.TriviaAPIV3;
+  const camera = window.TriviaCameraV3;
+  const monitor = window.TriviaCameraMonitorV3;
+  const LS = 'trivia_v3_session';
+  let sessionId = null, currentIndex = 0, total = 20, active = false, finishing = false, selected = null;
+  let deviceId = localStorage.getItem('trivia_v3_device');
+  if (!deviceId) { deviceId = (crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random()); localStorage.setItem('trivia_v3_device', deviceId); }
+
+  const $ = id => document.getElementById(id);
+  const start = $('startScreen'), quiz = $('quizScreen'), done = $('doneScreen');
+  const show = el => { start.classList.add('hidden'); quiz.classList.add('hidden'); done.classList.add('hidden'); el.classList.remove('hidden'); };
+  const notify = msg => { const n=$('notice'); n.textContent=msg; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'),2600); };
+  const setError = msg => { $('startStatus').textContent = msg; };
+
+  camera.init($('cameraPreview'), state => {
+    if (state === 'active') { $('cameraTitle').textContent='Camera connected'; $('cameraStatus').textContent='Keep it active throughout the trivia.'; }
+    if (state === 'ended' || state === 'stopped') { $('cameraTitle').textContent='Camera disconnected'; $('cameraStatus').textContent='Camera monitoring has stopped.'; if(active) logEvent('CAMERA_DISCONNECTED'); }
+  });
+
+  async function logEvent(type, detail) {
+    if (!sessionId) return;
+    try { await API.logIntegrity({sessionId, type, detail: JSON.stringify(detail || {})}); } catch(e) { console.warn(e); }
+  }
+
+  function monitorEvent(ev) { logEvent(ev.type, ev); }
+
+  async function begin(){
+    const name = $('nameInput').value.trim();
+    if (!name) { setError('Please enter your name.'); $('nameInput').focus(); return; }
+    $('beginBtn').disabled = true; setError('Starting camera check…');
+    try {
+      await camera.enable();
+      $('cameraSignals').classList.remove('hidden');
+      await monitor.init($('cameraPreview'), monitorEvent);
+      monitor.start();
+      try { await document.documentElement.requestFullscreen(); } catch(e) { console.warn('Fullscreen unavailable',e); }
+      setError('Connecting to the trivia backend…');
+      const data = await API.startSession({name,deviceId});
+      sessionId = data.sessionId; currentIndex = data.currentIndex || 0; total = data.total || cfg.questionCount;
+      localStorage.setItem(LS, sessionId);
+      active = true;
+      document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('blur', onBlur);
+      show(quiz);
+      renderQuestion(data.question);
+    } catch(e) {
+      monitor.stop(); camera.stop(); $('beginBtn').disabled=false;
+      setError(e.message || 'Unable to start the trivia.');
+    }
+  }
+
+  async function resume(){
+    const saved = localStorage.getItem(LS); if (!saved) return;
+    try {
+      sessionId = saved;
+      const data = await API.getQuestion({sessionId,index:0});
+      // If the backend says the session is not at index 0, restart through the explicit start flow.
+      if (data && data.question && data.question.index === 0) return;
+    } catch(e) { localStorage.removeItem(LS); }
+  }
+
+  function renderQuestion(q){
+    if (!q) return;
+    selected = null;
+    currentIndex = q.index;
+    $('counter').textContent = 'Question ' + (currentIndex+1) + ' of ' + total;
+    $('progressFill').style.width = ((currentIndex)/total*100) + '%';
+    $('tag').textContent = q.category + ' · ' + q.difficulty;
+    $('question').textContent = q.question;
+    $('quizStatus').textContent = '';
+    const letters=['A','B','C','D']; const box=$('options'); box.innerHTML='';
+    q.options.forEach((text,i)=>{
+      const b=document.createElement('button'); b.className='option'; b.type='button'; b.innerHTML='<b>'+letters[i]+'.</b> '+escapeHtml(text);
+      b.onclick=()=>answer(i,b); box.appendChild(b);
+    });
+  }
+
+  async function answer(choice, button){
+    if (!active || selected !== null || finishing) return;
+    selected=choice; document.querySelectorAll('.option').forEach(b=>b.disabled=true); button.classList.add('selected');
+    $('quizStatus').textContent='Saving answer…';
+    try {
+      const data = await API.submitAnswer({sessionId,index:currentIndex,choice});
+      if (data.complete) return finish();
+      const next = await API.getQuestion({sessionId,index:data.nextIndex});
+      renderQuestion(next.question);
+    } catch(e) {
+      $('quizStatus').textContent=e.message || 'Could not save the answer.';
+      document.querySelectorAll('.option').forEach(b=>b.disabled=false); selected=null;
+    }
+  }
+
+  async function finish(){
+    if (finishing) return; finishing=true; active=false; monitor.stop();
+    document.removeEventListener('visibilitychange',onVisibility); window.removeEventListener('blur',onBlur);
+    $('quizStatus').textContent='Finishing…';
+    try {
+      const data=await API.finishSession({sessionId});
+      show(done); $('doneName').textContent=data.name || 'Player'; $('score').textContent=data.score+' / '+data.total;
+      $('integritySummary').textContent='Integrity signals recorded: '+(data.integrityEvents||0)+' · Camera video was not uploaded.';
+      renderLeaderboard(data.leaderboard || []); localStorage.removeItem(LS);
+      try { if(document.fullscreenElement) await document.exitFullscreen(); } catch(e){}
+    } catch(e) {
+      finishing=false; active=true; $('quizStatus').textContent=e.message || 'Could not finish the trivia.';
+    }
+  }
+
+  async function onVisibility(){ if(!active) return; if(document.hidden){ notify('Please stay on the trivia page.'); await logEvent('TAB_HIDDEN'); } else { await logEvent('TAB_VISIBLE'); } }
+  async function onBlur(){ if(!active) return; await logEvent('WINDOW_BLUR'); }
+
+  function renderLeaderboard(rows){
+    const box=$('leaderRows');
+    if(!rows.length){box.innerHTML='<p>No scores yet.</p>';return;}
+    let html='<div class="row"><span>#</span><span>Name</span><span>Score</span><span class="time">Time</span></div>';
+    rows.forEach((r,i)=>{html+='<div class="row"><span>'+((i<3)?['🥇','🥈','🥉'][i]:(i+1))+'</span><span>'+escapeHtml(r.name)+'</span><span>'+r.score+'/'+r.total+'</span><span class="time">'+formatTime(r.timeSec)+'</span></div>';});
+    box.innerHTML=html;
+  }
+  function formatTime(s){s=Math.max(0,Number(s)||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+  function escapeHtml(s){const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+
+  document.addEventListener('keydown',e=>{
+    if(!active) return;
+    const k=(e.key||'').toLowerCase();
+    if((e.ctrlKey||e.metaKey)&&['c','a','u','p','s'].includes(k)){e.preventDefault();}
+    if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(k))){e.preventDefault();}
+  });
+  document.addEventListener('contextmenu',e=>{if(active)e.preventDefault();});
+  $('beginBtn').addEventListener('click',begin);
+  $('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')begin();});
+  window.addEventListener('beforeunload',e=>{if(active){e.preventDefault();e.returnValue='';}});
+})();
+</script>
+</body>
+</html>
