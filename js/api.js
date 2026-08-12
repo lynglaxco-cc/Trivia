@@ -3,7 +3,7 @@ window.TriviaAPI = (() => {
 
   async function request(action, payload = {}) {
     if (!config.appScriptUrl) {
-      return { ok: false, offline: true, action, ...payload };
+      throw new Error('Trivia backend URL is not configured.');
     }
 
     const response = await fetch(config.appScriptUrl, {
@@ -13,7 +13,9 @@ window.TriviaAPI = (() => {
     });
 
     if (!response.ok) throw new Error(`Backend request failed (${response.status}).`);
-    return response.json();
+    const data = await response.json();
+    if (data && data.ok === false && data.error) throw new Error(data.error);
+    return data;
   }
 
   return {
@@ -21,6 +23,8 @@ window.TriviaAPI = (() => {
     getQuestions: payload => request('getQuestions', payload),
     submitAnswer: payload => request('submitAnswer', payload),
     logIntegrity: payload => request('logIntegrity', payload),
-    finishSession: payload => request('finishSession', payload)
+    finishSession: payload => request('finishSession', payload),
+    getLeaderboard: payload => request('getLeaderboard', payload),
+    getRevealData: payload => request('getRevealData', payload)
   };
 })();
