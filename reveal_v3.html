@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Azaadi Ka Tadka — Leaderboard</title>
+<script src="js/config_v3.js?v=3"></script><script src="js/api_v3.js?v=3"></script>
+<style>
+body{margin:0;background:#07101f;color:#f5f7fb;font-family:Inter,Arial,sans-serif}.flag{height:8px;background:linear-gradient(#ff9933 0 33%,#fff 33% 66%,#138808 66%);margin:18px auto;width:min(1100px,94%);border-radius:8px}.wrap{width:min(1100px,94%);margin:auto}.brand{text-align:center}.brand h1{font:italic 52px Georgia,serif;color:#ff9633;margin:35px 0 4px}.brand p{color:#aeb8c8}.stats{display:flex;justify-content:center;gap:14px;margin:25px 0}.stat{background:#101a2c;border:1px solid rgba(255,153,51,.3);border-radius:15px;padding:15px 25px;text-align:center}.num{font-size:27px;font-weight:900;color:#ff9633}.lbl{font-size:11px;color:#aeb8c8;text-transform:uppercase;letter-spacing:.1em}.board{background:#101a2c;border:1px solid rgba(255,153,51,.3);border-radius:18px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,.3)}.row{display:grid;grid-template-columns:70px 1fr 130px 110px;gap:10px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.09);font-size:17px}.row.head{font-size:11px;color:#aeb8c8;text-transform:uppercase;letter-spacing:.08em}.row.top{background:rgba(255,150,51,.08)}.loading{text-align:center;color:#aeb8c8;padding:70px}.error{text-align:center;color:#ff9292;padding:40px}@media(max-width:650px){.brand h1{font-size:38px}.row{grid-template-columns:42px 1fr 80px}.row .time{display:none}.stats{gap:6px}.stat{padding:12px 14px}}
+</style>
+</head>
+<body>
+<div class="flag"></div><div class="wrap"><div class="brand"><h1>Azaadi Ka Tadka</h1><p>Independence Day Trivia — Live Leaderboard</p></div>
+<div id="content" class="loading">Loading leaderboard…</div></div>
+<script>
+(function(){
+  function esc(s){const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+  function time(s){s=Math.max(0,Number(s)||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+  function render(data){
+    if(!data||!data.ok){document.getElementById('content').innerHTML='<div class="error">Unable to load the leaderboard.</div>';return;}
+    let html='<div class="stats"><div class="stat"><div class="num">'+data.players+'</div><div class="lbl">Players</div></div><div class="stat"><div class="num">'+data.average+'</div><div class="lbl">Average</div></div><div class="stat"><div class="num">'+data.total+'</div><div class="lbl">Questions</div></div></div>';
+    html+='<div class="board"><div class="row head"><span>#</span><span>Name</span><span>Score</span><span class="time">Time</span></div>';
+    data.rows.forEach(function(r,i){html+='<div class="row '+(i<3?'top':'')+'"><span>'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</span><span>'+esc(r.name)+'</span><span>'+r.score+'/'+r.total+'</span><span class="time">'+time(r.timeSec)+'</span></div>';});
+    html+='</div>';document.getElementById('content').innerHTML=html;
+  }
+  function poll(){TriviaAPIV3.getRevealData().then(render).catch(function(e){document.getElementById('content').innerHTML='<div class="error">'+esc(e.message)+'</div>';});}
+  poll();setInterval(poll,5000);
+})();
+</script>
+</body></html>
