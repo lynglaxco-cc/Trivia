@@ -26,6 +26,9 @@ input:focus { border-color:var(--saffron); box-shadow:0 0 0 4px #ff99331c; }
 .camera-status-row strong { display:block; }
 .camera-status-row p { margin:4px 0 0; color:var(--muted); font-size:14px; }
 .camera-preview { display:none; width:100%; max-height:300px; object-fit:cover; border-radius:14px; margin-top:14px; background:#111; transform:scaleX(-1); }
+.camera-signals { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.camera-signals span { display:inline-flex; align-items:center; padding:6px 9px; border-radius:999px; background:#eef7ef; color:#16753a; font-size:12px; font-weight:700; }
+.camera-signals span[data-state="warning"] { background:#fff1f0; color:#b42318; }
 .message { min-height:22px; margin-top:14px; color:#475467; }
 .message[data-type="error"] { color:#b42318; font-weight:700; }
 .message[data-type="success"] { color:var(--green); font-weight:700; }
