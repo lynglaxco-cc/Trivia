@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Azaadi Ka Tadka — Reveal</title>
+  <title>Azaadi Ka Tadka — Leaderboard</title>
   <link rel="stylesheet" href="css/trivia.css">
 </head>
 <body>
@@ -11,17 +11,91 @@
     <div class="flag-stripe" aria-hidden="true"></div>
     <header class="hero">
       <p class="eyebrow">🇮🇳 INDEPENDENCE DAY SPECIAL</p>
-      <h1>That's a Wrap!</h1>
-      <p class="subtitle">Your answers have been recorded. The final reveal is coming up.</p>
+      <h1>Azaadi Ka Tadka</h1>
+      <p class="subtitle">Leaderboard</p>
     </header>
+
     <section class="screen active">
       <div class="card completion-card">
-        <div class="tricolor-mark">🇮🇳</div>
-        <h2>Thank you for playing.</h2>
-        <p>Your participation has been recorded.</p>
-        <p class="small-note">Scores and winners can be revealed separately by the host.</p>
+        <div class="tricolor-mark">🏆</div>
+        <h2>Leaderboard</h2>
+        <p id="revealStatus">Loading the latest scores…</p>
+        <div id="revealScore" class="score-summary hidden"></div>
+        <div id="revealLeaderboard" class="leaderboard"></div>
+        <p id="revealNote" class="small-note">Scores are loaded from the trivia backend.</p>
       </div>
     </section>
   </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('sessionId');
+      const $ = id => document.getElementById(id);
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+      }
+
+      function renderScore(data) {
+        if (!data) return;
+        const score = data.score ?? data.points;
+        if (score === undefined) return;
+        $('revealScore').classList.remove('hidden');
+        $('revealScore').innerHTML = `
+          <div class="score-main"><strong>${escapeHtml(score)}</strong><span>points</span></div>
+          <div class="score-details">
+            ${data.correct !== undefined ? `<span>${escapeHtml(data.correct)}/${escapeHtml(data.totalQuestions ?? 20)} correct</span>` : ''}
+            ${data.rank ? `<span>Rank #${escapeHtml(data.rank)}</span>` : ''}
+          </div>`;
+      }
+
+      function renderLeaderboard(data) {
+        const entries = Array.isArray(data?.entries) ? data.entries : (Array.isArray(data?.leaderboard) ? data.leaderboard : []);
+        if (!entries.length) {
+          $('revealLeaderboard').innerHTML = '<p>No leaderboard entries are available yet.</p>';
+          return;
+        }
+
+        const rows = entries.slice(0, 10).map((entry, index) => {
+          const rank = entry.rank ?? index + 1;
+          const score = entry.score ?? entry.points ?? 0;
+          return `<tr>
+            <td>${escapeHtml(rank)}</td>
+            <td>${escapeHtml(entry.name ?? 'Participant')}</td>
+            <td>${escapeHtml(score)}</td>
+          </tr>`;
+        }).join('');
+
+        $('revealLeaderboard').innerHTML = `
+          <h3>Top ${Math.min(10, entries.length)}</h3>
+          <table>
+            <thead><tr><th>#</th><th>Player</th><th>Score</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+
+      async function load() {
+        try {
+          // getRevealData is intended for the host/reveal view and can also
+          // return the current participant result when sessionId is supplied.
+          const data = await TriviaAPI.getRevealData(sessionId ? { sessionId } : {});
+          renderScore(data?.participant || data?.result || data);
+          renderLeaderboard(data);
+          $('revealStatus').textContent = 'Current scores';
+        } catch (error) {
+          console.warn(error);
+          $('revealStatus').textContent = 'The leaderboard could not be loaded yet.';
+          $('revealLeaderboard').innerHTML = `<p>${escapeHtml(error.message || 'Please try again later.')}</p>`;
+        }
+      }
+
+      load();
+      // Keep the reveal display current for the host screen.
+      setInterval(load, 5000);
+    })();
+  </script>
 </body>
 </html>
