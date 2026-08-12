@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#ff9933">
   <title>Azaadi Ka Tadka — Independence Day Trivia</title>
-  <link rel="stylesheet" href="css/trivia.css">
+  <link rel="stylesheet" href="css/trivia.css?v=3">
 </head>
 <body>
   <main class="app-shell">
@@ -84,13 +84,13 @@
     </section>
   </main>
 
-  <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/camera.js"></script>
-  <script src="js/integrity.js"></script>
-  <!-- MediaPipe performs face analysis locally in the browser. No video is sent to Apps Script. -->
+  <!-- Version query strings prevent browsers from reusing an older cached config/API file. -->
+  <script src="js/config.js?v=4"></script>
+  <script src="js/api.js?v=4"></script>
+  <script src="js/camera.js?v=4"></script>
+  <script src="js/integrity.js?v=4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
-  <script src="js/camera-monitor.js"></script>
-  <script src="js/trivia.js"></script>
+  <script src="js/camera-monitor.js?v=4"></script>
+  <script src="js/trivia.js?v=4"></script>
 </body>
 </html>
