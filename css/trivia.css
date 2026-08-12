@@ -1,0 +1,50 @@
+* { box-sizing: border-box; }
+:root { --saffron:#ff9933; --green:#138808; --navy:#102a43; --ink:#172b4d; --muted:#667085; --card:#fff; --bg:#f8fafc; }
+html,body { margin:0; min-height:100%; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:linear-gradient(180deg,#fff8ef 0%,#fff 48%,#f2fff4 100%); }
+body { min-height:100vh; }
+button,input { font:inherit; }
+button { cursor:pointer; }
+.app-shell { width:min(980px,100%); margin:0 auto; padding:22px 18px 48px; }
+.flag-stripe { height:9px; border-radius:999px; background:linear-gradient(to bottom,var(--saffron) 0 33%,#fff 33% 66%,var(--green) 66% 100%); box-shadow:0 2px 8px #00000012; }
+.hero { text-align:center; padding:34px 12px 22px; }
+.eyebrow { margin:0 0 8px; font-weight:800; letter-spacing:.12em; color:var(--saffron); font-size:13px; }
+h1 { margin:0; font-size:clamp(36px,7vw,64px); line-height:1; color:var(--navy); }
+.subtitle { color:var(--muted); margin:14px auto 0; max-width:620px; font-size:17px; }
+.screen { display:none; }
+.screen.active { display:block; }
+.card { background:var(--card); border:1px solid #e7ecf2; border-radius:22px; box-shadow:0 18px 50px #102a4312; }
+.instructions { padding:26px 30px; margin-bottom:18px; }
+.instructions h2 { margin:0 0 14px; }
+.instructions li { margin:9px 0; color:#475467; line-height:1.45; }
+.start-card { padding:28px; }
+label { display:block; font-weight:800; margin-bottom:8px; }
+input { width:100%; border:1px solid #d0d5dd; border-radius:12px; padding:14px 15px; outline:none; }
+input:focus { border-color:var(--saffron); box-shadow:0 0 0 4px #ff99331c; }
+.camera-panel { margin-top:20px; border:1px solid #e4e7ec; border-radius:16px; padding:16px; background:#fafbfc; }
+.camera-status-row { display:flex; gap:12px; align-items:flex-start; }
+.camera-icon { font-size:25px; }
+.camera-status-row strong { display:block; }
+.camera-status-row p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+.camera-preview { display:none; width:100%; max-height:300px; object-fit:cover; border-radius:14px; margin-top:14px; background:#111; transform:scaleX(-1); }
+.message { min-height:22px; margin-top:14px; color:#475467; }
+.button-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.primary-btn { border:0; border-radius:12px; padding:13px 20px; background:var(--saffron); color:#fff; font-weight:800; box-shadow:0 7px 18px #ff99333b; }
+.primary-btn:hover { filter:brightness(.96); transform:translateY(-1px); }
+.primary-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+.hidden { display:none !important; }
+.small-note { color:#98a2b3; font-size:12px; margin:12px 0 0; }
+.quiz-topbar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; margin-bottom:16px; font-weight:800; }
+.timer { min-width:58px; text-align:center; border-radius:14px; padding:10px 12px; background:#fff; border:1px solid #e7ecf2; font-size:24px; }
+.integrity-pill { justify-self:end; font-size:13px; color:var(--green); }
+.question-card { padding:30px; }
+.question-label { color:var(--saffron); font-weight:900; letter-spacing:.1em; font-size:12px; }
+.question-card h2 { font-size:clamp(24px,4vw,38px); line-height:1.2; margin:10px 0 24px; }
+.options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.option { text-align:left; border:1px solid #dfe5ec; background:#fff; border-radius:14px; padding:16px; font-weight:700; color:var(--ink); }
+.option:hover { border-color:var(--saffron); background:#fffaf5; }
+.option.selected { border-color:var(--saffron); box-shadow:0 0 0 3px #ff99331f; }
+.quiz-footer { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-top:16px; color:var(--muted); font-size:13px; }
+.completion-card { text-align:center; padding:50px 28px; }
+.tricolor-mark { font-size:42px; }
+.completion-card h2 { font-size:36px; margin:10px 0; }
+@media (max-width:650px) { .app-shell{padding:14px 12px 34px}.instructions,.start-card,.question-card{padding:20px}.options{grid-template-columns:1fr}.quiz-topbar{grid-template-columns:1fr auto}.integrity-pill{grid-column:1/-1;justify-self:start}.quiz-footer{flex-direction:column;align-items:stretch}.quiz-footer .primary-btn{width:100%} }
