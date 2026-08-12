@@ -24,9 +24,9 @@
           <li>Questions are delivered <strong>one at a time</strong>.</li>
           <li>Once you advance, your answer is <strong>locked</strong>. No going back.</li>
           <li>Stay on this page and keep the quiz in <strong>fullscreen</strong>.</li>
-          <li>A <strong>camera-based integrity check</strong> runs while you play.</li>
-          <li>Camera video is processed in the browser and is <strong>not uploaded or recorded by this frontend</strong>.</li>
-          <li>Tab switches, fullscreen exits and camera interruptions may be recorded as integrity events.</li>
+          <li>A <strong>camera-based integrity check</strong> runs locally in your browser while you play.</li>
+          <li>The camera is used for integrity signals such as face presence, multiple faces and visible-device signals. <strong>Video is not uploaded or recorded by this frontend.</strong></li>
+          <li>Tab switches, fullscreen exits and camera interruptions may also be recorded as integrity events.</li>
           <li>Your score and the leaderboard are shown after you finish.</li>
         </ul>
       </div>
@@ -44,6 +44,10 @@
             </div>
           </div>
           <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
+          <div id="cameraSignals" class="camera-signals hidden" aria-live="polite">
+            <span id="faceSignal">● Face check starting…</span>
+            <span id="deviceSignal">● Device check starting…</span>
+          </div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -84,6 +88,9 @@
   <script src="js/api.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/integrity.js"></script>
+  <!-- MediaPipe performs face analysis locally in the browser. No video is sent to Apps Script. -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+  <script src="js/camera-monitor.js"></script>
   <script src="js/trivia.js"></script>
 </body>
 </html>
