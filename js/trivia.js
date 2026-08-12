@@ -9,18 +9,8 @@
     questions: [],
     index: 0,
     selected: null,
-    answers: [],
-    timerId: null,
-    remaining: config.questionTimeSeconds
+    answers: []
   };
-
-  // Temporary local questions let us test the GitHub-hosted frontend before
-  // connecting the Apps Script backend. Replace through the API later.
-  const demoQuestions = [
-    { id: 'demo-1', text: '“Mere paas maa hai.” — Which film is this dialogue from?', options: ['Deewaar', 'Sholay', 'Don', 'Agneepath'] },
-    { id: 'demo-2', text: '“Kitne aadmi the?” — Which film is this dialogue from?', options: ['Sholay', 'Zanjeer', 'Dabangg', 'Lagaan'] },
-    { id: 'demo-3', text: '“Bade bade deshon mein aisi chhoti chhoti baatein hoti rehti hain.” — Which film?', options: ['Dilwale Dulhania Le Jayenge', 'Kabhi Khushi Kabhie Gham', 'Mohabbatein', 'Kuch Kuch Hota Hai'] }
-  ];
 
   function show(id) {
     screens.forEach(screen => $(screen).classList.toggle('active', screen === id));
@@ -37,12 +27,16 @@
     const pill = $('integrityPill');
     if (status === 'active') {
       text.textContent = 'Camera connected. Keep it active throughout the trivia.';
-      pill.textContent = '● Camera active';
-      pill.style.color = 'var(--green)';
+      if (pill) {
+        pill.textContent = '● Camera active';
+        pill.style.color = 'var(--green)';
+      }
     } else {
       text.textContent = 'Camera is not currently active.';
-      pill.textContent = '● Camera issue';
-      pill.style.color = '#b42318';
+      if (pill) {
+        pill.textContent = '● Camera issue';
+        pill.style.color = '#b42318';
+      }
     }
   }
 
@@ -77,17 +71,28 @@
       result = await TriviaAPI.startSession({ name: state.name });
     } catch (error) {
       console.warn(error);
-      result = { offline: true };
+      $('startQuizBtn').disabled = false;
+      return message('The trivia backend could not be reached. Please try again.', 'error');
     }
 
-    state.sessionId = result?.sessionId || `demo-${Date.now()}`;
-    state.questions = result?.questions?.length ? result.questions : demoQuestions;
+    if (!result?.questions?.length) {
+      $('startQuizBtn').disabled = false;
+      return message('No question set was returned by the trivia backend. Connect the 20-question Apps Script question bank before starting.', 'error');
+    }
+
+    state.sessionId = result.sessionId || null;
+    state.questions = result.questions;
     state.index = 0;
     state.answers = [];
 
+    if (config.expectedQuestionCount && state.questions.length !== config.expectedQuestionCount) {
+      $('startQuizBtn').disabled = false;
+      return message(`The backend returned ${state.questions.length} questions; ${config.expectedQuestionCount} are required.`, 'error');
+    }
+
     TriviaIntegrity.start(event => {
       $('integrityText').textContent = `Integrity: ${event.type.replaceAll('_', ' ').toLowerCase()}`;
-      if (state.sessionId && !result?.offline) {
+      if (state.sessionId) {
         TriviaAPI.logIntegrity({ sessionId: state.sessionId, event }).catch(console.warn);
       }
     });
@@ -99,9 +104,10 @@
   }
 
   function renderQuestion() {
-    clearInterval(state.timerId);
     state.selected = null;
     const q = state.questions[state.index];
+    if (!q) return completeQuiz();
+
     $('questionNumber').textContent = `Question ${state.index + 1} of ${state.questions.length}`;
     $('questionText').textContent = q.text;
     $('saveAnswerBtn').disabled = true;
@@ -116,17 +122,6 @@
       button.addEventListener('click', () => selectOption(i, button));
       options.appendChild(button);
     });
-
-    state.remaining = config.questionTimeSeconds;
-    $('timer').textContent = state.remaining;
-    state.timerId = setInterval(() => {
-      state.remaining -= 1;
-      $('timer').textContent = Math.max(0, state.remaining);
-      if (state.remaining <= 0) {
-        clearInterval(state.timerId);
-        saveAnswer(null, true);
-      }
-    }, 1000);
   }
 
   function selectOption(index, button) {
@@ -136,16 +131,26 @@
     $('saveAnswerBtn').disabled = false;
   }
 
-  async function saveAnswer(timedOut = false) {
-    clearInterval(state.timerId);
+  async function saveAnswer() {
+    if (state.selected === null) return;
+
     const q = state.questions[state.index];
     const answer = state.selected;
-    state.answers.push({ questionId: q.id, answer, timedOut });
+    state.answers.push({ questionId: q.id, answer });
     $('saveAnswerBtn').disabled = true;
 
-    if (state.sessionId && !state.sessionId.startsWith('demo-')) {
-      try { await TriviaAPI.submitAnswer({ sessionId: state.sessionId, questionId: q.id, answer, timedOut }); }
-      catch (error) { console.warn(error); }
+    try {
+      if (state.sessionId) {
+        await TriviaAPI.submitAnswer({
+          sessionId: state.sessionId,
+          questionId: q.id,
+          answer
+        });
+      }
+    } catch (error) {
+      console.warn(error);
+      $('saveAnswerBtn').disabled = false;
+      return message('Your answer could not be saved. Please try again.', 'error');
     }
 
     if (state.index < state.questions.length - 1) {
@@ -157,8 +162,7 @@
   }
 
   async function completeQuiz() {
-    clearInterval(state.timerId);
-    if (state.sessionId && !state.sessionId.startsWith('demo-')) {
+    if (state.sessionId) {
       try { await TriviaAPI.finishSession({ sessionId: state.sessionId }); }
       catch (error) { console.warn(error); }
     }
@@ -172,6 +176,6 @@
   TriviaCamera.init($('cameraPreview'), cameraState);
   $('enableCameraBtn').addEventListener('click', enableCamera);
   $('startQuizBtn').addEventListener('click', startQuiz);
-  $('saveAnswerBtn').addEventListener('click', () => saveAnswer(false));
+  $('saveAnswerBtn').addEventListener('click', saveAnswer);
   $('revealBtn').addEventListener('click', reveal);
 })();
