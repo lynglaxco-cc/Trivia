@@ -27,7 +27,7 @@
           <li>A <strong>camera-based integrity check</strong> runs while you play.</li>
           <li>Camera video is processed in the browser and is <strong>not uploaded or recorded by this frontend</strong>.</li>
           <li>Tab switches, fullscreen exits and camera interruptions may be recorded as integrity events.</li>
-          <li>You will not see correctness or your running score. Winners are announced separately.</li>
+          <li>Your score and the leaderboard are shown after you finish.</li>
         </ul>
       </div>
 
@@ -39,19 +39,16 @@
           <div class="camera-status-row">
             <span class="camera-icon">📷</span>
             <div>
-              <strong>Camera check required</strong>
-              <p id="cameraStatusText">Click Enable Camera and choose Allow when your browser asks.</p>
+              <strong>Ready to begin?</strong>
+              <p id="cameraStatusText">Click Begin Trivia. Your browser will request camera access as part of the start process.</p>
             </div>
           </div>
           <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
-        <div class="button-row">
-          <button id="enableCameraBtn" class="primary-btn" type="button">📷 Enable Camera</button>
-          <button id="startQuizBtn" class="primary-btn hidden" type="button">🇮🇳 Start Trivia</button>
-        </div>
-        <p class="small-note">Camera permission is requested only after you click the button.</p>
+        <button id="startQuizBtn" class="primary-btn" type="button">🇮🇳 Begin Trivia</button>
+        <p class="small-note">Selecting Begin Trivia starts the camera check and then starts your trivia session.</p>
       </div>
     </section>
 
@@ -75,8 +72,10 @@
       <div class="card completion-card">
         <div class="tricolor-mark">🇮🇳</div>
         <h2>Trivia complete!</h2>
-        <p>Your responses have been submitted.</p>
-        <button id="revealBtn" class="primary-btn" type="button">View Reveal</button>
+        <p id="completionMessage">Your responses have been submitted.</p>
+        <div id="scoreSummary" class="score-summary hidden"></div>
+        <div id="leaderboard" class="leaderboard hidden"></div>
+        <button id="revealBtn" class="secondary-btn" type="button">Open Full Reveal</button>
       </div>
     </section>
   </main>
