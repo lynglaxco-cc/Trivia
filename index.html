@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff9933">
+  <title>Azaadi Ka Tadka — Independence Day Trivia</title>
+  <link rel="stylesheet" href="css/trivia.css">
+</head>
+<body>
+  <main class="app-shell">
+    <div class="flag-stripe" aria-hidden="true"></div>
+    <header class="hero">
+      <p class="eyebrow">🇮🇳 INDEPENDENCE DAY SPECIAL</p>
+      <h1>Azaadi Ka Tadka</h1>
+      <p class="subtitle">Independence Day Movie Quiz — name that dialogue!</p>
+    </header>
+
+    <section id="introScreen" class="screen active">
+      <div class="card instructions">
+        <h2>Before you begin</h2>
+        <ul>
+          <li>You get <strong>15 seconds per question</strong>. The clock does not pause.</li>
+          <li>Questions are delivered <strong>one at a time</strong>.</li>
+          <li>Once you advance, your answer is <strong>locked</strong>. No going back.</li>
+          <li>Stay on this page and keep the quiz in <strong>fullscreen</strong>.</li>
+          <li>A <strong>camera-based integrity check</strong> runs while you play.</li>
+          <li>Camera video is processed in the browser and is <strong>not uploaded or recorded by this frontend</strong>.</li>
+          <li>Tab switches, fullscreen exits and camera interruptions may be recorded as integrity events.</li>
+          <li>You will not see correctness or your running score. Winners are announced separately.</li>
+        </ul>
+      </div>
+
+      <div class="card start-card">
+        <label for="participantName">Your name</label>
+        <input id="participantName" autocomplete="name" maxlength="100" placeholder="Enter your name">
+
+        <div id="cameraPanel" class="camera-panel">
+          <div class="camera-status-row">
+            <span class="camera-icon">📷</span>
+            <div>
+              <strong>Camera check required</strong>
+              <p id="cameraStatusText">Click Enable Camera and choose Allow when your browser asks.</p>
+            </div>
+          </div>
+          <video id="cameraPreview" class="camera-preview" autoplay muted playsinline></video>
+        </div>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+        <div class="button-row">
+          <button id="enableCameraBtn" class="primary-btn" type="button">📷 Enable Camera</button>
+          <button id="startQuizBtn" class="primary-btn hidden" type="button">🇮🇳 Start Trivia</button>
+        </div>
+        <p class="small-note">Camera permission is requested only after you click the button.</p>
+      </div>
+    </section>
+
+    <section id="quizScreen" class="screen" aria-live="polite">
+      <div class="quiz-topbar">
+        <div><span id="questionNumber">Question 1</span></div>
+        <div class="timer" id="timer">15</div>
+        <div class="integrity-pill" id="integrityPill">● Camera active</div>
+      </div>
+      <div class="card question-card">
+        <p class="question-label">NAME THAT DIALOGUE</p>
+        <h2 id="questionText">Loading question…</h2>
+        <div id="options" class="options"></div>
+      </div>
+      <div class="quiz-footer">
+        <span id="integrityText">Integrity monitoring active</span>
+        <button id="saveAnswerBtn" class="primary-btn" type="button" disabled>Save &amp; Continue</button>
+      </div>
+    </section>
+
+    <section id="completeScreen" class="screen">
+      <div class="card completion-card">
+        <div class="tricolor-mark">🇮🇳</div>
+        <h2>Trivia complete!</h2>
+        <p>Your responses have been submitted.</p>
+        <button id="revealBtn" class="primary-btn" type="button">View Reveal</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/integrity.js"></script>
+  <script src="js/trivia.js"></script>
+</body>
+</html>
