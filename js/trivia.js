@@ -10,7 +10,8 @@
     index: 0,
     selected: null,
     answers: [],
-    result: null
+    result: null,
+    monitorReady: false
   };
 
   function show(id) {
@@ -45,6 +46,13 @@
         pill.textContent = '● Camera issue';
         pill.style.color = '#b42318';
       }
+    }
+  }
+
+  function handleIntegrityEvent(event) {
+    $('integrityText').textContent = `Integrity: ${event.type.replaceAll('_', ' ').toLowerCase()}`;
+    if (state.sessionId) {
+      TriviaAPI.logIntegrity({ sessionId: state.sessionId, event }).catch(console.warn);
     }
   }
 
@@ -83,6 +91,18 @@
     cameraState('active');
     message('Camera ready. Starting your trivia…');
 
+    // Prepare browser-side integrity models after the camera is available.
+    // The models inspect the live camera locally; video is never sent to Apps Script.
+    if (config.cameraMonitoring && window.TriviaCameraMonitor) {
+      try {
+        await TriviaCameraMonitor.init($('cameraPreview'), handleIntegrityEvent);
+        state.monitorReady = true;
+      } catch (error) {
+        console.warn('Camera monitor initialization failed:', error);
+        state.monitorReady = false;
+      }
+    }
+
     let result;
     try {
       result = await TriviaAPI.startSession({ name: state.name });
@@ -110,12 +130,11 @@
     state.answers = [];
     state.result = null;
 
-    TriviaIntegrity.start(event => {
-      $('integrityText').textContent = `Integrity: ${event.type.replaceAll('_', ' ').toLowerCase()}`;
-      if (state.sessionId) {
-        TriviaAPI.logIntegrity({ sessionId: state.sessionId, event }).catch(console.warn);
-      }
-    });
+    TriviaIntegrity.start(handleIntegrityEvent);
+
+    if (state.monitorReady) {
+      TriviaCameraMonitor.start();
+    }
 
     if (config.fullscreenRequired) {
       await TriviaIntegrity.requestFullscreen();
@@ -184,6 +203,7 @@
   }
 
   async function completeQuiz() {
+    if (window.TriviaCameraMonitor) TriviaCameraMonitor.stop();
     $('completionMessage').textContent = 'Calculating your score and loading the live leaderboard…';
     show('completeScreen');
 
@@ -202,7 +222,6 @@
       renderLeaderboard(leaderboard, state.result);
     } catch (error) {
       console.warn(error);
-      // Keep the participant score visible even if the leaderboard call fails.
       renderLeaderboard({ entries: [] }, state.result);
     }
   }
